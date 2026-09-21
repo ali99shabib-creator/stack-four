@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#281207" />
+<title>Stack Four — Classic Wood</title>
+<style>
+  :root{
+    --bg-1:#120704;
+    --bg-2:#2a1208;
+    --wood-deep:#2a1207;
+    --wood-dark:#4a2410;
+    --wood:#77401d;
+    --wood-mid:#9e5e2b;
+    --wood-light:#c98a47;
+    --gold:#e0a85a;
+    --gold-soft:#f4cd87;
+    --cream:#f2d694;
+    --cream-hi:#ffe8ae;
+    --cream-low:#b87d3e;
+    --brown:#4a2514;
+    --brown-hi:#744128;
+    --brown-low:#1d0d08;
+    --text:#f7e8c8;
+    --muted:#d2b991;
+    --shadow:rgba(0,0,0,.55);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%;background:#130804;color:var(--text)}
+  body{
+    min-height:100vh;
+    font-family:Georgia,"Times New Roman",serif;
+    background:
+      radial-gradient(ellipse at 50% -15%,rgba(207,127,55,.25),transparent 42%),
+      linear-gradient(180deg,#311708 0%,#1b0c06 60%,#0e0603 100%);
+    overflow-x:hidden;
+  }
+  button{font:inherit}
+  .app{width:min(1040px,100%);margin:auto;padding:12px}
+  .panel{
+    position:relative;
+    overflow:hidden;
+    border:3px solid #a96531;
+    border-radius:30px;
+    padding:clamp(14px,2.4vw,26px);
+    background:
+      linear-gradient(90deg,transparent 0 7%,rgba(255,255,255,.025) 8%,transparent 9% 28%,rgba(0,0,0,.055) 29%,transparent 31% 57%,rgba(255,255,255,.02) 58%,transparent 60%),
+      repeating-linear-gradient(2deg,#6d3818 0 4px,#75401d 4px 8px,#623016 8px 12px);
+    box-shadow:
+      0 18px 55px #000a,
+      inset 0 0 0 5px #351707,
+      inset 0 0 40px #0008;
+  }
+  .panel:after{
+    content:"";position:absolute;inset:8px;border:1px solid #df9d4d33;border-radius:23px;pointer-events:none
+  }
+
+  /* MENU */
+  .title{text-align:center;margin:10px 0 4px;font-weight:900;text-transform:uppercase;text-shadow:0 4px 0 #200b03,0 10px 18px #0009}
+  .title .stack{display:block;font-size:clamp(52px,9vw,88px);line-height:.88;color:#e6bd77;letter-spacing:.08em}
+  .title .four{display:block;font-size:clamp(30px,5.3vw,50px);color:#b96f32;letter-spacing:.22em;margin-top:12px}
+  .subtitle{
+    max-width:700px;margin:18px auto 22px;text-align:center;
+    color:#e0c8a1;line-height:1.7;font-size:clamp(14px,2.3vw,17px)
+  }
+  .menuTop{display:flex;justify-content:flex-end;position:relative;z-index:3}
+  .langBtn{
+    border:1px solid #d49a57;background:#3a1b0dd9;color:#f7dfb7;border-radius:999px;
+    padding:9px 14px;cursor:pointer;font-weight:800;box-shadow:inset 0 1px 0 #fff2
+  }
+  .modeGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:780px;margin:0 auto 16px}
+  .modeCard{
+    cursor:pointer;border:2px solid #bf7b3d;border-radius:20px;padding:22px 16px;color:#f6e4c2;
+    background:linear-gradient(180deg,#713a19,#44200e);
+    box-shadow:inset 0 2px 0 #fff2,0 7px 0 #281006,0 15px 28px #0005;
+    transition:.18s transform,.18s filter,.18s border-color;
+  }
+  .modeCard:hover{filter:brightness(1.08);border-color:#edae61;transform:translateY(-2px)}
+  .modeCard:active{transform:translateY(4px);box-shadow:inset 0 2px 0 #fff2,0 2px 0 #281006}
+  .modeIcon{font-size:34px;margin-bottom:8px}
+  .modeCard b{display:block;font-size:22px;margin-bottom:6px}
+  .modeCard span{display:block;color:#d9bd91;font-size:13px;line-height:1.5}
+  .difficultyWrap{display:none;max-width:780px;margin:22px auto 4px}
+  .difficultyTitle{text-align:center;color:#f1d7aa;font-size:18px;margin:0 0 12px;font-weight:800}
+  .difficultyGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+  .woodBtn,.difficultyBtn{
+    position:relative;z-index:2;
+    border:2px solid #d09450;color:#fff0d0;cursor:pointer;
+    background:linear-gradient(#8b4c22,#573018);
+    border-radius:15px;padding:13px 14px;font-weight:800;
+    box-shadow:inset 0 2px 0 #ffffff22,0 5px 0 #2d1308,0 9px 16px #0005;
+    transition:.15s transform,.15s filter
+  }
+  .woodBtn:hover,.difficultyBtn:hover{filter:brightness(1.11)}
+  .woodBtn:active,.difficultyBtn:active{transform:translateY(3px);box-shadow:inset 0 2px 0 #ffffff22,0 2px 0 #2d1308}
+  .difficultyBtn b{display:block;font-size:18px}.difficultyBtn span{font-size:11px;color:#e2c7a0}
+
+  /* GAME */
+  #gameScreen{display:none}
+  .topbar{
+    position:relative;z-index:2;
+    display:grid;grid-template-columns:auto 1fr auto auto;gap:9px;align-items:center;margin-bottom:12px
+  }
+  .status{
+    text-align:center;border:2px solid #a86632;border-radius:14px;padding:10px 12px;background:#271208dd;
+    box-shadow:inset 0 0 16px #0008;color:#f3deb8;font-weight:900;min-width:0
+  }
+  .woodBtn.small{padding:9px 13px;border-radius:12px;font-size:13px;white-space:nowrap}
+
+  .tableLayout{display:flex;flex-direction:column;gap:12px}
+  .reserve{
+    position:relative;z-index:2;
+    min-height:112px;border:2px solid #9d602c;border-radius:20px;padding:10px 14px;
+    background:
+      linear-gradient(180deg,rgba(75,35,14,.95),rgba(39,17,7,.96)),
+      repeating-linear-gradient(2deg,#6b3719 0 3px,#74401d 3px 6px);
+    box-shadow:inset 0 0 24px #0008,0 4px 12px #0005;
+    display:grid;grid-template-columns:145px 1fr;align-items:center;
+  }
+  .reserve.active{
+    border-color:#e0aa60;
+    box-shadow:inset 0 0 24px #0008,0 0 0 3px #e0aa6028,0 7px 18px #0006
+  }
+  .reserveHeader{text-align:center;padding:6px 10px}
+  .reserveHeader h3{margin:0;color:#edc77f;font-size:19px}
+  .reserveHeader .mini{font-size:11px;color:#caae84;margin-top:6px}
+  .pieceGroups{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .pieceGroup{
+    min-height:86px;border-radius:14px;background:#16090545;border:1px solid #c1813a33;
+    display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:12px 8px 9px
+  }
+  .boardShell{
+    position:relative;z-index:2;
+    width:min(660px,94vw);aspect-ratio:1/1;margin:auto;
+    padding:clamp(12px,2vw,20px);border-radius:30px;
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.08),transparent 25%),
+      linear-gradient(145deg,#a8632f,#663516);
+    border:4px solid #ca8c45;
+    box-shadow:0 18px 34px #0009,inset 0 0 0 6px #3b1a0a,inset 0 0 32px #0005;
+  }
+  .board{
+    width:100%;height:100%;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);
+    gap:clamp(8px,1.5vw,16px)
+  }
+  .cell{
+    position:relative;border-radius:50%;cursor:pointer;overflow:visible;
+    background:
+      radial-gradient(circle at 47% 38%,#5a2b12 0 24%,#3a1809 50%,#1d0b04 78%,#0b0301 100%);
+    border:3px solid #c8873f;
+    box-shadow:inset 0 10px 18px #000c,inset 0 -2px 7px #d68d3b22,0 2px 0 #efb963;
+    display:flex;align-items:center;justify-content:center;
+    transition:.13s filter,.13s outline
+  }
+  .cell:hover{filter:brightness(1.05)}
+  .cell.legal{outline:3px solid #f0c67566;outline-offset:2px}
+  .cell.legal:after{
+    content:"";position:absolute;width:18%;aspect-ratio:1;border-radius:50%;background:#efc57466;
+    box-shadow:0 0 14px #f1c67566
+  }
+  .cell.win{animation:winPulse .8s infinite alternate}
+  @keyframes winPulse{
+    to{box-shadow:inset 0 10px 18px #000c,0 0 28px #ffd671,0 0 0 4px #f5c56c66}
+  }
+
+  /* 3D WOODEN PIECES */
+  .reservePiece,.boardPiece{
+    --side1:#d9a955;--side2:#ffe3a1;--side3:#bb7737;--top1:#ffecb6;--top2:#c78b45;
+    position:relative;display:block;border:none;cursor:pointer;
+    border-radius:48% 48% 39% 39% / 18% 18% 12% 12%;
+    background:
+      repeating-linear-gradient(86deg,transparent 0 7px,rgba(79,39,12,.09) 8px 9px,transparent 10px 15px),
+      linear-gradient(90deg,var(--side3) 0%,var(--side1) 17%,var(--side2) 43%,var(--side1) 72%,#9b5929 100%);
+    box-shadow:
+      inset 8px 0 9px rgba(255,255,255,.14),
+      inset -10px 0 12px rgba(0,0,0,.25),
+      inset 0 -10px 11px rgba(42,15,4,.25),
+      0 8px 8px rgba(0,0,0,.50),
+      0 13px 18px rgba(0,0,0,.22);
+    transform:perspective(260px) rotateX(-3deg);
+    transition:.15s transform,.15s filter,.15s opacity;
+  }
+  .piece-dark{
+    --side1:#4d2a19;--side2:#75442a;--side3:#1d0d08;--top1:#70442b;--top2:#27120b;
+  }
+  .piece-light{
+    --side1:#ddb263;--side2:#ffe5a3;--side3:#a96630;--top1:#ffe9ab;--top2:#bd8040;
+  }
+  .reservePiece:before,.boardPiece:before{
+    content:"";position:absolute;z-index:3;left:4%;right:4%;top:-8%;height:22%;
+    border-radius:50%;
+    background:
+      radial-gradient(ellipse at 42% 28%,rgba(255,255,255,.42),transparent 24%),
+      repeating-radial-gradient(ellipse at 48% 50%,transparent 0 7px,rgba(68,29,8,.09) 8px 9px),
+      linear-gradient(135deg,var(--top1),var(--top2));
+    border:1px solid rgba(37,13,4,.46);
+    box-shadow:inset 0 3px 4px rgba(255,255,255,.22),inset 0 -4px 7px rgba(0,0,0,.21),0 2px 2px #0004;
+  }
+  .reservePiece:after,.boardPiece:after{
+    content:"";position:absolute;left:11%;right:11%;bottom:-5%;height:13%;border-radius:50%;
+    background:rgba(20,7,2,.62);filter:blur(2px);z-index:-1
+  }
+  .reservePiece:hover{transform:perspective(260px) rotateX(-3deg) translateY(-4px)}
+  .reservePiece.selected,.boardPiece.selected{
+    transform:perspective(260px) rotateX(-3deg) translateY(-9px) scale(1.04);
+    filter:drop-shadow(0 0 9px #ffd47c)
+  }
+  .reservePiece.disabled{opacity:.14;cursor:default;filter:grayscale(.75)}
+  .reservePiece.disabled:hover{transform:perspective(260px) rotateX(-3deg)}
+  .s1{width:38px;height:42px}.s2{width:52px;height:58px}.s3{width:66px;height:76px}
+  .boardPiece{position:absolute;bottom:10%;animation:pieceDrop .18s ease-out}
+  @keyframes pieceDrop{from{transform:translateY(-16px) scale(.92);opacity:.5}}
+  .boardPiece.s1{width:33%;height:43%}
+  .boardPiece.s2{width:48%;height:59%}
+  .boardPiece.s3{width:63%;height:75%}
+
+  .turnDot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-inline:7px;vertical-align:-1px;box-shadow:inset 0 1px 2px #fff5,0 1px 3px #0008}
+  .turnDot.light{background:#f1cf7e}.turnDot.dark{background:#4a2616;border:1px solid #ac7040}
+  .legend{position:relative;z-index:2;margin-top:12px;text-align:center;color:#d7bc92;font-size:12px;line-height:1.6}
+
+  .overlay{
+    display:none;position:fixed;inset:0;background:#000c;z-index:20;align-items:center;justify-content:center;padding:20px;
+    backdrop-filter:blur(4px)
+  }
+  .dialog{
+    width:min(480px,100%);text-align:center;border:3px solid #c68b48;border-radius:24px;padding:26px;
+    background:linear-gradient(#75411f,#2b1409);box-shadow:0 20px 60px #000
+  }
+  .dialog h2{font-size:32px;margin:0 0 10px;color:#f0c980}.dialog p{color:#ead4af;line-height:1.7}
+  .actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+  @media(max-width:760px){
+    .app{padding:5px}.panel{padding:9px;border-radius:20px}
+    .topbar{grid-template-columns:auto 1fr auto}.topbar .langBtn{grid-column:1/-1;justify-self:end}
+    .status{font-size:13px;padding:9px 5px}
+    .reserve{min-height:90px;grid-template-columns:90px 1fr;padding:7px}
+    .reserveHeader h3{font-size:14px}.reserveHeader .mini{font-size:9px}
+    .pieceGroup{min-height:68px;padding:9px 3px 6px;gap:4px}
+    .reservePiece.s1{width:28px;height:31px}.reservePiece.s2{width:37px;height:42px}.reservePiece.s3{width:47px;height:54px}
+    .boardShell{width:100%;border-radius:22px;padding:10px}
+    .modeGrid{grid-template-columns:1fr}.difficultyGrid{grid-template-columns:1fr}
+    .title .stack{font-size:52px}.title .four{font-size:28px}
+  }
+  @media(max-width:430px){
+    .reserve{grid-template-columns:74px 1fr}
+    .pieceGroups{gap:3px}.pieceGroup{gap:2px}
+    .reservePiece.s1{width:23px;height:27px}.reservePiece.s2{width:31px;height:36px}.reservePiece.s3{width:39px;height:46px}
+    .woodBtn.small{padding:8px 9px;font-size:11px}
+  }
+
+/* ===== SINGLE-SCREEN / NO-SCROLL LAYOUT ===== */
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden !important;
+}
+body {
+  display: block;
+}
+.app {
+  width: min(1040px, 100%);
+  height: 100dvh;
+  margin: 0 auto;
+  padding: clamp(4px, .8vh, 10px);
+  overflow: hidden;
+}
+#menuScreen,
+#gameScreen {
+  height: calc(100dvh - clamp(8px, 1.6vh, 20px));
+  max-height: calc(100dvh - clamp(8px, 1.6vh, 20px));
+  overflow: hidden !important;
+}
+
+/* GAME: header + top player + board + bottom player all inside one viewport */
+#gameScreen {
+  display: none;
+  grid-template-rows: auto auto minmax(0,1fr) auto auto;
+  gap: clamp(4px, .7vh, 9px);
+  padding: clamp(6px, 1.2vh, 14px);
+}
+#gameScreen[style*="display: block"] {
+  display: grid !important;
+}
+.topbar {
+  margin: 0;
+  min-height: 42px;
+}
+.tableLayout {
+  display: contents;
+}
+#topReserve {
+  grid-row: 2;
+}
+.boardShell {
+  grid-row: 3;
+}
+#bottomReserve {
+  grid-row: 4;
+}
+.legend {
+  grid-row: 5;
+  margin: 0;
+  font-size: clamp(9px, 1.25vh, 12px);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Compact player areas */
+.reserve {
+  min-height: 0;
+  height: clamp(66px, 10.5vh, 98px);
+  grid-template-columns: clamp(78px, 15vw, 135px) 1fr;
+  padding: clamp(4px, .7vh, 8px) clamp(6px, 1vw, 12px);
+  border-radius: 16px;
+}
+.reserveHeader {
+  padding: 2px 6px;
+}
+.reserveHeader h3 {
+  font-size: clamp(12px, 2vh, 18px);
+}
+.reserveHeader .mini {
+  font-size: clamp(8px, 1.35vh, 11px);
+  margin-top: 2px;
+}
+.pieceGroups {
+  height: 100%;
+  gap: clamp(3px, .7vw, 7px);
+}
+.pieceGroup {
+  min-height: 0;
+  height: 100%;
+  padding: clamp(5px, .8vh, 9px) 3px 4px;
+  gap: clamp(2px, .7vw, 8px);
+}
+
+/* Reserve pieces scale with viewport height */
+.reservePiece.s1 { width: clamp(20px, 4.5vh, 34px); height: clamp(23px, 5.1vh, 38px); }
+.reservePiece.s2 { width: clamp(27px, 5.8vh, 43px); height: clamp(31px, 6.7vh, 50px); }
+.reservePiece.s3 { width: clamp(34px, 7.1vh, 53px); height: clamp(40px, 8.2vh, 61px); }
+
+/* Board consumes whatever vertical space remains, but never forces scrolling */
+.boardShell {
+  width: min(
+    92vw,
+    64vh,
+    calc(100dvh - 42px - 2 * clamp(66px, 10.5vh, 98px) - 48px)
+  );
+  max-width: 610px;
+  max-height: 100%;
+  aspect-ratio: 1 / 1;
+  margin: auto;
+  padding: clamp(7px, 1.4vh, 14px);
+  border-radius: clamp(18px, 3vh, 28px);
+}
+.board {
+  gap: clamp(5px, 1vh, 12px);
+}
+.cell {
+  border-width: clamp(2px, .45vh, 3px);
+}
+
+/* Smaller controls so the header never pushes the board below the fold */
+.status {
+  padding: clamp(6px, 1vh, 9px) 6px;
+  font-size: clamp(11px, 1.8vh, 15px);
+}
+.woodBtn.small,
+#gameLangBtn {
+  padding: clamp(6px, 1vh, 9px) clamp(7px, 1.1vw, 12px);
+  font-size: clamp(10px, 1.55vh, 13px);
+}
+.turnDot {
+  width: clamp(8px, 1.5vh, 12px);
+  height: clamp(8px, 1.5vh, 12px);
+}
+
+/* MENU also fits without scrolling */
+#menuScreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(8px, 1.7vh, 22px);
+}
+#menuScreen .menuTop {
+  position: absolute;
+  top: clamp(10px, 2vh, 18px);
+  right: clamp(10px, 2vw, 18px);
+}
+html[dir="rtl"] #menuScreen .menuTop {
+  right: auto;
+  left: clamp(10px, 2vw, 18px);
+}
+#menuScreen .title {
+  margin: 0 0 clamp(2px, .8vh, 8px);
+}
+#menuScreen .title .stack {
+  font-size: clamp(38px, 8.5vh, 76px);
+}
+#menuScreen .title .four {
+  font-size: clamp(22px, 4.7vh, 42px);
+  margin-top: clamp(4px, .8vh, 10px);
+}
+#menuScreen .subtitle {
+  margin: clamp(5px, 1vh, 12px) auto clamp(7px, 1.4vh, 16px);
+  font-size: clamp(11px, 1.75vh, 16px);
+  line-height: 1.35;
+}
+.modeGrid {
+  width: min(760px, 100%);
+  gap: clamp(7px, 1.3vh, 13px);
+  margin-bottom: clamp(5px, 1vh, 12px);
+}
+.modeCard {
+  padding: clamp(9px, 1.8vh, 18px) 12px;
+}
+.modeIcon {
+  font-size: clamp(22px, 4vh, 34px);
+  margin-bottom: 4px;
+}
+.modeCard b {
+  font-size: clamp(15px, 2.5vh, 21px);
+  margin-bottom: 3px;
+}
+.modeCard span {
+  font-size: clamp(10px, 1.5vh, 13px);
+}
+.difficultyWrap {
+  margin: clamp(5px, 1vh, 12px) auto 0;
+}
+.difficultyTitle {
+  margin-bottom: clamp(4px, .8vh, 9px);
+  font-size: clamp(13px, 2vh, 17px);
+}
+.difficultyBtn {
+  padding: clamp(7px, 1.2vh, 11px) 9px;
+}
+.difficultyBtn b {
+  font-size: clamp(13px, 2vh, 17px);
+}
+.difficultyBtn span {
+  font-size: clamp(9px, 1.35vh, 11px);
+}
+
+/* Portrait phones */
+@media (max-width: 760px) {
+  .app { padding: 3px; }
+  #gameScreen {
+    height: calc(100dvh - 6px);
+    max-height: calc(100dvh - 6px);
+    padding: 5px;
+  }
+  .topbar {
+    grid-template-columns: auto 1fr auto auto !important;
+    gap: 4px;
+  }
+  .topbar .langBtn {
+    grid-column: auto !important;
+    justify-self: auto !important;
+  }
+  .reserve {
+    grid-template-columns: 68px 1fr;
+    height: clamp(62px, 9.8vh, 82px);
+    padding: 4px;
+  }
+  .pieceGroup {
+    min-height: 0;
+    height: 100%;
+  }
+  .boardShell {
+    width: min(
+      96vw,
+      59vh,
+      calc(100dvh - 42px - 2 * clamp(62px, 9.8vh, 82px) - 38px)
+    );
+    padding: 7px;
+  }
+  .legend {
+    font-size: 9px;
+  }
+  .modeGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .difficultyGrid {
+    grid-template-columns: repeat(3,1fr);
+  }
+}
+
+/* Very short screens: prioritize the board and hide non-essential helper text */
+@media (max-height: 650px) {
+  .legend { display:none; }
+  #gameScreen { grid-template-rows:auto auto minmax(0,1fr) auto; }
+  .reserve { height: clamp(56px, 10vh, 68px); }
+  .reserveHeader .mini { display:none; }
+  .boardShell {
+    width: min(88vw, 60vh, calc(100dvh - 42px - 2 * clamp(56px,10vh,68px) - 22px));
+  }
+  #menuScreen .subtitle { max-width: 620px; }
+}
+
+/* Landscape phones/tablets: keep top/bottom relationship but make rows flatter */
+@media (orientation: landscape) and (max-height: 600px) {
+  #gameScreen { padding: 4px; gap: 3px; }
+  .topbar { min-height: 34px; }
+  .reserve {
+    height: clamp(48px, 12vh, 62px);
+    grid-template-columns: 90px 1fr;
+  }
+  .reserveHeader h3 { font-size: 12px; }
+  .pieceGroup { padding: 3px; }
+  .reservePiece.s1 { width: 20px; height: 23px; }
+  .reservePiece.s2 { width: 26px; height: 30px; }
+  .reservePiece.s3 { width: 32px; height: 37px; }
+  .boardShell {
+    width: min(52vh, 54vw, calc(100dvh - 34px - 2 * clamp(48px,12vh,62px) - 12px));
+  }
+  .legend { display:none; }
+  #menuScreen .title .stack { font-size: clamp(34px, 10vh, 58px); }
+  #menuScreen .title .four { font-size: clamp(18px, 5vh, 30px); }
+  #menuScreen .subtitle { margin: 4px auto 7px; font-size: 11px; }
+  .modeCard { padding: 7px 10px; }
+  .difficultyWrap { margin-top: 5px; }
+}
+
+/* Prevent accidental page movement on touch while playing */
+#gameScreen, #gameScreen * {
+  overscroll-behavior: none;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <section id="menuScreen" class="panel">
+    <div class="menuTop"><button id="menuLangBtn" class="langBtn" onclick="toggleLanguage()">العربية</button></div>
+    <h1 class="title"><span class="stack">STACK</span><span class="four">FOUR</span></h1>
+    <p id="menuSubtitle" class="subtitle"></p>
+
+    <div class="modeGrid">
+      <button class="modeCard" onclick="showDifficulties()">
+        <div class="modeIcon">♟</div>
+        <b id="vsComputerTitle"></b>
+        <span id="vsComputerDesc"></span>
+      </button>
+      <button class="modeCard" onclick="startLocalGame()">
+        <div class="modeIcon">♟ ♟</div>
+        <b id="twoPlayersTitle"></b>
+        <span id="twoPlayersDesc"></span>
+      </button>
+    </div>
+
+    <div id="difficultyWrap" class="difficultyWrap">
+      <div id="difficultyTitle" class="difficultyTitle"></div>
+      <div class="difficultyGrid">
+        <button class="difficultyBtn" onclick="startComputerGame('easy')"><b id="easyTitle"></b><span id="easyDesc"></span></button>
+        <button class="difficultyBtn" onclick="startComputerGame('medium')"><b id="mediumTitle"></b><span id="mediumDesc"></span></button>
+        <button class="difficultyBtn" onclick="startComputerGame('hard')"><b id="hardTitle"></b><span id="hardDesc"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="panel">
+    <div class="topbar">
+      <button id="menuBtn" class="woodBtn small" onclick="backToMenu()"></button>
+      <div id="status" class="status"></div>
+      <button id="restartBtn" class="woodBtn small" onclick="restartGame()"></button>
+      <button id="gameLangBtn" class="langBtn" onclick="toggleLanguage()">العربية</button>
+    </div>
+
+    <div class="tableLayout">
+      <!-- Player 2 / Computer ALWAYS at the top -->
+      <aside id="topReserve" class="reserve">
+        <div class="reserveHeader">
+          <h3 id="topName"></h3>
+          <div id="topMini" class="mini"></div>
+        </div>
+        <div class="pieceGroups">
+          <div class="pieceGroup" id="p2Small"></div>
+          <div class="pieceGroup" id="p2Medium"></div>
+          <div class="pieceGroup" id="p2Large"></div>
+        </div>
+      </aside>
+
+      <div class="boardShell">
+        <div id="board" class="board"></div>
+      </div>
+
+      <!-- Player 1 ALWAYS at the bottom -->
+      <aside id="bottomReserve" class="reserve">
+        <div class="reserveHeader">
+          <h3 id="bottomName"></h3>
+          <div id="bottomMini" class="mini"></div>
+        </div>
+        <div class="pieceGroups">
+          <div class="pieceGroup" id="p1Small"></div>
+          <div class="pieceGroup" id="p1Medium"></div>
+          <div class="pieceGroup" id="p1Large"></div>
+        </div>
+      </aside>
+    </div>
+
+    <div id="legend" class="legend"></div>
+  </section>
+</div>
+
+<div id="overlay" class="overlay">
+  <div class="dialog">
+    <h2 id="resultTitle"></h2>
+    <p id="resultText"></p>
+    <div class="actions">
+      <button id="playAgainBtn" class="woodBtn" onclick="restartGame();hideOverlay()"></button>
+      <button id="dialogMenuBtn" class="woodBtn" onclick="backToMenu();hideOverlay()"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const P1 = 0; // beige - bottom
+const P2 = 1; // brown - top
+const WIN_LINES = [
+  [0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],
+  [0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],
+  [0,5,10,15],[3,6,9,12]
+];
+
+const TXT = {
+  en:{
+    menuSubtitle:"A classic wooden strategy game on a 4×4 board. Each player has 9 pieces: 3 small, 3 medium and 3 large. Cover smaller pieces and build a line of four to win.",
+    vsComputerTitle:"Play vs Computer", vsComputerDesc:"Choose Easy, Medium or Hard AI.",
+    twoPlayersTitle:"Two Players", twoPlayersDesc:"Play locally with another person on the same device.",
+    difficultyTitle:"Choose difficulty",
+    easyTitle:"Easy", easyDesc:"Relaxed AI for learning the game.",
+    mediumTitle:"Medium", mediumDesc:"Balances attack and defense.",
+    hardTitle:"Hard", hardDesc:"Stronger strategic search.",
+    menu:"Menu", restart:"Restart", arabic:"العربية", english:"English",
+    player1:"Player 1", player2:"Player 2", computer:"Computer", beige:"Beige", brown:"Brown",
+    yourTurn:"Your turn", thinking:"Computer is thinking", turn:"turn",
+    easy:"Easy", medium:"Medium", hard:"Hard",
+    legend:"Each player has 9 pieces: 3 small + 3 medium + 3 large. A larger piece can cover a smaller one. You may also move your top visible pieces.",
+    player1Wins:"Player 1 wins!", player2Wins:"Player 2 wins!", youWin:"You win!", computerWins:"Computer wins!",
+    p1WinText:"The beige player completed a line of four.", p2WinText:"The brown player completed a line of four.",
+    youWinText:"Excellent — you completed a line of four.", computerWinText:"The computer completed a line of four. Try again!",
+    playAgain:"Play Again"
+  },
+  ar:{
+    menuSubtitle:"لعبة استراتيجية خشبية كلاسيكية على لوحة 4×4. لكل لاعب 9 قطع: 3 صغيرة و3 متوسطة و3 كبيرة. غطِّ القطع الأصغر واصنع خطًا من أربع قطع للفوز.",
+    vsComputerTitle:"اللعب ضد الكمبيوتر", vsComputerDesc:"اختر مستوى مبتدئ أو متوسط أو صعب.",
+    twoPlayersTitle:"لاعبان", twoPlayersDesc:"العب مع شخص آخر على نفس الجهاز.",
+    difficultyTitle:"اختر مستوى الصعوبة",
+    easyTitle:"مبتدئ", easyDesc:"ذكاء اصطناعي بسيط مناسب لتعلم اللعبة.",
+    mediumTitle:"متوسط", mediumDesc:"يوازن بين الهجوم والدفاع.",
+    hardTitle:"صعب", hardDesc:"بحث استراتيجي أقوى وقرارات أدق.",
+    menu:"القائمة", restart:"إعادة", arabic:"العربية", english:"English",
+    player1:"اللاعب 1", player2:"اللاعب 2", computer:"الكمبيوتر", beige:"بيج", brown:"بني",
+    yourTurn:"دورك", thinking:"الكمبيوتر يفكر", turn:"دور",
+    easy:"مبتدئ", medium:"متوسط", hard:"صعب",
+    legend:"لكل لاعب 9 قطع: 3 صغيرة + 3 متوسطة + 3 كبيرة. القطعة الأكبر تستطيع تغطية الأصغر. ويمكن تحريك القطع العليا الظاهرة من اللوحة.",
+    player1Wins:"فاز اللاعب 1!", player2Wins:"فاز اللاعب 2!", youWin:"أحسنت! فزت", computerWins:"فاز الكمبيوتر!",
+    p1WinText:"اللاعب البيج أكمل خطًا من أربع قطع.", p2WinText:"اللاعب البني أكمل خطًا من أربع قطع.",
+    youWinText:"ممتاز — أكملت خطًا من أربع قطع.", computerWinText:"أكمل الكمبيوتر خطًا من أربع قطع. حاول مرة أخرى!",
+    playAgain:"العب مجددًا"
+  }
+};
+
+let language = "en";
+let mode = "computer"; // computer | local
+let difficulty = "medium";
+let currentPlayer = P1;
+let gameOver = false;
+let thinking = false;
+let selected = null;
+let board = [];
+let reserve = [];
+
+function tr(key){ return TXT[language][key] ?? key; }
+
+function applyLanguage(){
+  document.documentElement.lang = language;
+  document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  document.getElementById("menuLangBtn").textContent = language === "en" ? tr("arabic") : tr("english");
+  document.getElementById("gameLangBtn").textContent = language === "en" ? tr("arabic") : tr("english");
+  document.getElementById("menuSubtitle").textContent = tr("menuSubtitle");
+  document.getElementById("vsComputerTitle").textContent = tr("vsComputerTitle");
+  document.getElementById("vsComputerDesc").textContent = tr("vsComputerDesc");
+  document.getElementById("twoPlayersTitle").textContent = tr("twoPlayersTitle");
+  document.getElementById("twoPlayersDesc").textContent = tr("twoPlayersDesc");
+  document.getElementById("difficultyTitle").textContent = tr("difficultyTitle");
+  document.getElementById("easyTitle").textContent = tr("easyTitle");
+  document.getElementById("easyDesc").textContent = tr("easyDesc");
+  document.getElementById("mediumTitle").textContent = tr("mediumTitle");
+  document.getElementById("mediumDesc").textContent = tr("mediumDesc");
+  document.getElementById("hardTitle").textContent = tr("hardTitle");
+  document.getElementById("hardDesc").textContent = tr("hardDesc");
+  document.getElementById("menuBtn").textContent = tr("menu");
+  document.getElementById("restartBtn").textContent = tr("restart");
+  document.getElementById("legend").textContent = tr("legend");
+  document.getElementById("playAgainBtn").textContent = tr("playAgain");
+  document.getElementById("dialogMenuBtn").textContent = tr("menu");
+  updatePlayerLabels();
+  updateStatus();
+}
+function toggleLanguage(){
+  language = language === "en" ? "ar" : "en";
+  applyLanguage();
+}
+function showDifficulties(){
+  document.getElementById("difficultyWrap").style.display = "block";
+  
+}
+function startComputerGame(level){
+  mode = "computer"; difficulty = level; enterGame();
+}
+function startLocalGame(){
+  mode = "local"; difficulty = "medium"; enterGame();
+}
+function enterGame(){
+  document.getElementById("menuScreen").style.display = "none";
+  document.getElementById("gameScreen").style.display = "block";
+  resetState();
+  applyLanguage();
+  render();
+}
+function backToMenu(){
+  gameOver = true; thinking = false; selected = null;
+  document.getElementById("gameScreen").style.display = "none";
+  document.getElementById("menuScreen").style.display = "block";
+  document.getElementById("difficultyWrap").style.display = "none";
+}
+function restartGame(){
+  resetState();
+  hideOverlay();
+  render();
+  applyLanguage();
+}
+function resetState(){
+  board = Array.from({length:16},()=>[]);
+  reserve = [{1:3,2:3,3:3},{1:3,2:3,3:3}];
+  currentPlayer = P1;
+  gameOver = false;
+  thinking = false;
+  selected = null;
+}
+function getTopPiece(cell){
+  return cell.length ? cell[cell.length - 1] : null;
+}
+function canPlace(piece,cell){
+  const visible = getTopPiece(cell);
+  return !visible || piece.size > visible.size;
+}
+function pieceClass(player,size){
+  return `${player===P1 ? "piece-light" : "piece-dark"} s${size}`;
+}
+function isHumanTurn(){
+  return mode === "local" || currentPlayer === P1;
+}
+function canInteractWith(player){
+  return !gameOver && !thinking && isHumanTurn() && currentPlayer === player;
+}
+
+function updatePlayerLabels(){
+  const topName = document.getElementById("topName");
+  const topMini = document.getElementById("topMini");
+  const bottomName = document.getElementById("bottomName");
+  const bottomMini = document.getElementById("bottomMini");
+
+  topName.textContent = mode === "computer" ? tr("computer") : tr("player2");
+  topMini.textContent = tr("brown");
+  bottomName.textContent = tr("player1");
+  bottomMini.textContent = tr("beige");
+
+  document.getElementById("topReserve").classList.toggle("active", currentPlayer === P2);
+  document.getElementById("bottomReserve").classList.toggle("active", currentPlayer === P1);
+}
+function updateStatus(){
+  const el = document.getElementById("status");
+  if(!el) return;
+
+  if(mode === "computer"){
+    if(currentPlayer === P1){
+      el.innerHTML = `<span class="turnDot light"></span>${tr("yourTurn")} — ${tr(difficulty)}`;
+    }else{
+      el.innerHTML = `<span class="turnDot dark"></span>${tr("thinking")} — ${tr(difficulty)}`;
+    }
+  }else{
+    const who = currentPlayer === P1 ? tr("player1") : tr("player2");
+    const dot = currentPlayer === P1 ? "light" : "dark";
+    el.innerHTML = `<span class="turnDot ${dot}"></span>${tr("turn")} ${who}`;
+  }
+  updatePlayerLabels();
+}
+
+function render(){
+  renderBoard();
+  renderReserve(P1,"p1");
+  renderReserve(P2,"p2");
+  updateStatus();
+}
+function renderBoard(){
+  const root = document.getElementById("board");
+  root.innerHTML = "";
+
+  board.forEach((cell,index)=>{
+    const cellEl = document.createElement("div");
+    cellEl.className = "cell";
+
+    const visible = getTopPiece(cell);
+    if(visible){
+      const pieceEl = document.createElement("div");
+      pieceEl.className = `boardPiece ${pieceClass(visible.player,visible.size)}`;
+      if(selected && selected.source==="board" && selected.index===index) pieceEl.classList.add("selected");
+      pieceEl.addEventListener("click",(ev)=>{
+        ev.stopPropagation();
+        selectBoardPiece(index);
+      });
+      cellEl.appendChild(pieceEl);
+    }
+
+    if(selected && canPlace(selected.piece,cell) && !(selected.source==="board" && selected.index===index)){
+      cellEl.classList.add("legal");
+    }
+
+    cellEl.addEventListener("click",()=>placeSelected(index));
+    root.appendChild(cellEl);
+  });
+}
+function renderReserve(player,prefix){
+  const map = [[1,"Small"],[2,"Medium"],[3,"Large"]];
+  map.forEach(([size,name])=>{
+    const root = document.getElementById(prefix + name);
+    root.innerHTML = "";
+    for(let n=0;n<3;n++){
+      const pieceEl = document.createElement("div");
+      pieceEl.className = `reservePiece ${pieceClass(player,size)}`;
+
+      if(n >= reserve[player][size]){
+        pieceEl.classList.add("disabled");
+      }else if(canInteractWith(player)){
+        pieceEl.addEventListener("click",()=>selectReservePiece(player,size));
+      }
+
+      if(selected && selected.source==="reserve" && selected.piece.player===player && selected.piece.size===size){
+        pieceEl.classList.add("selected");
+      }
+      root.appendChild(pieceEl);
+    }
+  });
+}
+function selectReservePiece(player,size){
+  if(!canInteractWith(player) || reserve[player][size] <= 0) return;
+  selected = {source:"reserve",piece:{player,size}};
+  render();
+}
+function selectBoardPiece(index){
+  if(gameOver || thinking || !isHumanTurn()) return;
+  const visible = getTopPiece(board[index]);
+  if(!visible || visible.player !== currentPlayer) return;
+
+  if(selected && selected.source==="board" && selected.index===index){
+    selected = null;
+  }else{
+    selected = {source:"board",index,piece:{...visible}};
+  }
+  render();
+}
+function placeSelected(index){
+  if(!selected || gameOver || thinking || !isHumanTurn()) return;
+  if(selected.piece.player !== currentPlayer) return;
+  if(selected.source==="board" && selected.index===index) return;
+  if(!canPlace(selected.piece,board[index])) return;
+
+  const move = {
+    from:selected.source==="board" ? selected.index : null,
+    to:index,
+    size:selected.piece.size,
+    player:currentPlayer
+  };
+
+  applyMove(move);
+  selected = null;
+  render();
+
+  if(finishIfWinner()) return;
+  switchTurn();
+}
+function switchTurn(){
+  currentPlayer = currentPlayer === P1 ? P2 : P1;
+  render();
+
+  if(mode === "computer" && currentPlayer === P2 && !gameOver){
+    thinking = true;
+    render();
+    setTimeout(computerTurn,420);
+  }
+}
+function applyMove(move,stateBoard=board,stateReserve=reserve){
+  if(move.from === null){
+    stateReserve[move.player][move.size]--;
+  }else{
+    stateBoard[move.from].pop();
+  }
+  stateBoard[move.to].push({player:move.player,size:move.size});
+}
+function winnerOf(stateBoard=board){
+  for(const line of WIN_LINES){
+    const owners = line.map(i=>getTopPiece(stateBoard[i])?.player);
+    if(owners.every(p=>p===P1)) return P1;
+    if(owners.every(p=>p===P2)) return P2;
+  }
+  return null;
+}
+function finishIfWinner(){
+  const winner = winnerOf();
+  if(winner === null) return false;
+
+  gameOver = true;
+  thinking = false;
+  highlightWinner(winner);
+  setTimeout(()=>showResult(winner),380);
+  return true;
+}
+function highlightWinner(winner){
+  const cells = [...document.querySelectorAll(".cell")];
+  for(const line of WIN_LINES){
+    if(line.every(i=>getTopPiece(board[i])?.player===winner)){
+      line.forEach(i=>cells[i]?.classList.add("win"));
+    }
+  }
+}
+function showResult(winner){
+  let title,text;
+  if(mode==="computer"){
+    if(winner===P1){title=tr("youWin");text=tr("youWinText")}
+    else{title=tr("computerWins");text=tr("computerWinText")}
+  }else{
+    if(winner===P1){title=tr("player1Wins");text=tr("p1WinText")}
+    else{title=tr("player2Wins");text=tr("p2WinText")}
+  }
+  document.getElementById("resultTitle").textContent = title;
+  document.getElementById("resultText").textContent = text;
+  document.getElementById("overlay").style.display = "flex";
+}
+function hideOverlay(){
+  document.getElementById("overlay").style.display = "none";
+}
+
+/* ---------- AI ---------- */
+function cloneState(){
+  return {
+    b:board.map(cell=>cell.map(p=>({...p}))),
+    r:reserve.map(x=>({...x}))
+  };
+}
+function getMoves(player,stateBoard=board,stateReserve=reserve){
+  const moves=[];
+  for(let size=1;size<=3;size++){
+    if(stateReserve[player][size]>0){
+      for(let to=0;to<16;to++){
+        if(canPlace({player,size},stateBoard[to])) moves.push({from:null,to,size,player});
+      }
+    }
+  }
+  for(let from=0;from<16;from++){
+    const visible=getTopPiece(stateBoard[from]);
+    if(visible && visible.player===player){
+      for(let to=0;to<16;to++){
+        if(to!==from && canPlace(visible,stateBoard[to])) moves.push({from,to,size:visible.size,player});
+      }
+    }
+  }
+  return moves;
+}
+function computerTurn(){
+  if(gameOver) return;
+  const moves=getMoves(P2);
+  if(!moves.length){
+    thinking=false;
+    currentPlayer=P1;
+    render();
+    return;
+  }
+
+  let move;
+  if(difficulty==="easy") move=chooseEasyMove(moves);
+  else if(difficulty==="medium") move=chooseMediumMove(moves);
+  else move=chooseHardMove(moves);
+
+  applyMove(move);
+  thinking=false;
+  render();
+
+  if(finishIfWinner()) return;
+  currentPlayer=P1;
+  render();
+}
+function findImmediateWin(player,moves,stateB=board,stateR=reserve){
+  for(const move of moves){
+    const b=stateB.map(c=>c.map(p=>({...p})));
+    const r=stateR.map(x=>({...x}));
+    applyMove(move,b,r);
+    if(winnerOf(b)===player) return move;
+  }
+  return null;
+}
+function immediateWinningTargets(player,stateB=board,stateR=reserve){
+  const targets=new Set();
+  for(const move of getMoves(player,stateB,stateR)){
+    const b=stateB.map(c=>c.map(p=>({...p})));
+    const r=stateR.map(x=>({...x}));
+    applyMove(move,b,r);
+    if(winnerOf(b)===player) targets.add(move.to);
+  }
+  return [...targets];
+}
+function chooseEasyMove(moves){
+  if(Math.random()<0.38){
+    const win=findImmediateWin(P2,moves);
+    if(win) return win;
+  }
+  return moves[Math.floor(Math.random()*moves.length)];
+}
+function chooseMediumMove(moves){
+  let win=findImmediateWin(P2,moves);
+  if(win) return win;
+
+  const danger=immediateWinningTargets(P1);
+  if(danger.length){
+    const blockers=moves.filter(m=>danger.includes(m.to));
+    if(blockers.length) return heuristicChoice(blockers,P2);
+  }
+  return heuristicChoice(moves,P2);
+}
+function chooseHardMove(moves){
+  let win=findImmediateWin(P2,moves);
+  if(win) return win;
+
+  const danger=immediateWinningTargets(P1);
+  if(danger.length){
+    const blockers=moves.filter(m=>danger.includes(m.to));
+    if(blockers.length) moves=blockers;
+  }
+
+  const base=cloneState();
+  const depth=moves.length>70 ? 2 : 3;
+  let best=-Infinity,bestMoves=[];
+
+  const ordered=[...moves].sort((a,b)=>quickMoveScore(b,P2,board)-quickMoveScore(a,P2,board));
+  for(const move of ordered){
+    const b=base.b.map(c=>c.map(p=>({...p})));
+    const r=base.r.map(x=>({...x}));
+    applyMove(move,b,r);
+    const score=minimax(b,r,depth-1,false,-Infinity,Infinity);
+
+    if(score>best){best=score;bestMoves=[move]}
+    else if(score===best){bestMoves.push(move)}
+  }
+  return bestMoves[Math.floor(Math.random()*bestMoves.length)] || heuristicChoice(moves,P2);
+}
+function minimax(b,r,depth,maximizing,alpha,beta){
+  const winner=winnerOf(b);
+  if(winner===P2) return 100000+depth;
+  if(winner===P1) return -100000-depth;
+  if(depth===0) return evaluatePosition(b,r);
+
+  const player=maximizing ? P2 : P1;
+  let moves=getMoves(player,b,r);
+  if(!moves.length) return evaluatePosition(b,r);
+
+  moves.sort((a,c)=>quickMoveScore(c,player,b)-quickMoveScore(a,player,b));
+  if(moves.length>28) moves=moves.slice(0,28);
+
+  if(maximizing){
+    let value=-Infinity;
+    for(const move of moves){
+      const bb=b.map(c=>c.map(p=>({...p})));
+      const rr=r.map(x=>({...x}));
+      applyMove(move,bb,rr);
+      value=Math.max(value,minimax(bb,rr,depth-1,false,alpha,beta));
+      alpha=Math.max(alpha,value);
+      if(beta<=alpha) break;
+    }
+    return value;
+  }else{
+    let value=Infinity;
+    for(const move of moves){
+      const bb=b.map(c=>c.map(p=>({...p})));
+      const rr=r.map(x=>({...x}));
+      applyMove(move,bb,rr);
+      value=Math.min(value,minimax(bb,rr,depth-1,true,alpha,beta));
+      beta=Math.min(beta,value);
+      if(beta<=alpha) break;
+    }
+    return value;
+  }
+}
+function evaluatePosition(b,r){
+  let score=0;
+  for(const line of WIN_LINES){
+    const pieces=line.map(i=>getTopPiece(b[i]));
+    const aiCount=pieces.filter(p=>p?.player===P2).length;
+    const humanCount=pieces.filter(p=>p?.player===P1).length;
+
+    if(aiCount && humanCount) continue;
+    if(aiCount) score += [0,4,18,100,5000][aiCount];
+    if(humanCount) score -= [0,4,22,120,5000][humanCount];
+  }
+
+  for(const i of [5,6,9,10]){
+    const p=getTopPiece(b[i]);
+    if(p) score += (p.player===P2?1:-1)*(2+p.size);
+  }
+  score += (r[P2][3]-r[P1][3])*.4;
+  return score;
+}
+function quickMoveScore(move,player,stateBoard){
+  let score=move.size*2;
+  if([5,6,9,10].includes(move.to)) score+=5;
+  const target=getTopPiece(stateBoard[move.to]);
+  if(target && target.player!==player) score+=4;
+  return score;
+}
+function heuristicChoice(moves,player){
+  let best=-Infinity,bestMoves=[];
+  for(const move of moves){
+    const state=cloneState();
+    applyMove(move,state.b,state.r);
+    let score=evaluatePosition(state.b,state.r)*(player===P2?1:-1);
+    score+=quickMoveScore(move,player,board);
+
+    if(score>best){best=score;bestMoves=[move]}
+    else if(score===best){bestMoves.push(move)}
+  }
+  return bestMoves[Math.floor(Math.random()*bestMoves.length)];
+}
+
+/* initialize menu in English */
+resetState();
+applyLanguage();
+</script>
+</body>
+</html>
