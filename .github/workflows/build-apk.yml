@@ -44,59 +44,37 @@ jobs:
         run: npx cap sync android
 
       - name: Restore signing keystore
-        shell: bash
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/stack-four-release.jks
 
-      - name: Configure release signing
-        shell: bash
-        env:
-          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          cat >> android/gradle.properties <<EOF
-          STACKFOUR_STORE_FILE=stack-four-release.jks
-          STACKFOUR_STORE_PASSWORD=$STORE_PASSWORD
-          STACKFOUR_KEY_ALIAS=$KEY_ALIAS
-          STACKFOUR_KEY_PASSWORD=$KEY_PASSWORD
-          EOF
-
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("android/app/build.gradle")
-          s = p.read_text()
-          if "signingConfigs {" not in s:
-              s = s.replace(
-                  "android {",
-                  """android {
-              signingConfigs {
-                  release {
-                      storeFile file(STACKFOUR_STORE_FILE)
-                      storePassword STACKFOUR_STORE_PASSWORD
-                      keyAlias STACKFOUR_KEY_ALIAS
-                      keyPassword STACKFOUR_KEY_PASSWORD
-                  }
-              }
-          """,
-                  1
-              )
-          if "signingConfig signingConfigs.release" not in s:
-              s = s.replace(
-                  "buildTypes {\n        release {",
-                  "buildTypes {\n        release {\n            signingConfig signingConfigs.release",
-                  1
-              )
-          p.write_text(s)
-          PY
-
-      - name: Build signed release APK
+      - name: Build unsigned release APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease
+
+      - name: Sign release APK
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          BUILD_TOOLS_VERSION=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
+          ZIPALIGN="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/zipalign"
+          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner"
+
+          UNSIGNED_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          ALIGNED_APK="android/app/build/outputs/apk/release/app-release-aligned.apk"
+          SIGNED_APK="android/app/build/outputs/apk/release/app-release.apk"
+
+          test -f "$UNSIGNED_APK"
+
+          "$ZIPALIGN" -f -v 4 "$UNSIGNED_APK" "$ALIGNED_APK"
+
+          "$APKSIGNER" sign             --ks android/app/stack-four-release.jks             --ks-key-alias "$KEY_ALIAS"             --ks-pass "pass:$STORE_PASSWORD"             --key-pass "pass:$STORE_PASSWORD"             --out "$SIGNED_APK"             "$ALIGNED_APK"
+
+          "$APKSIGNER" verify --verbose "$SIGNED_APK"
 
       - name: Upload signed release APK
         uses: actions/upload-artifact@v4
@@ -104,19 +82,4 @@ jobs:
           name: StackFour-Release-APK
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
-        run: npx cap add android
-
-      - name: Sync game
-        run: npx cap sync android
-
-      - name: Build APK
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: StackFour-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
