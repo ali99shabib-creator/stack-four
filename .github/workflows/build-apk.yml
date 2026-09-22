@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Signed Release APK
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  build-apk:
+  build-release-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,12 +31,79 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Prepare game files
+      - name: Prepare web files
         run: |
           mkdir -p www
           cp index.html www/index.html
+          if [ -f privacy.html ]; then cp privacy.html www/privacy.html; fi
 
       - name: Create Android project
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Restore signing keystore
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/stack-four-release.jks
+
+      - name: Configure release signing
+        shell: bash
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cat >> android/gradle.properties <<EOF
+          STACKFOUR_STORE_FILE=stack-four-release.jks
+          STACKFOUR_STORE_PASSWORD=$STORE_PASSWORD
+          STACKFOUR_KEY_ALIAS=$KEY_ALIAS
+          STACKFOUR_KEY_PASSWORD=$KEY_PASSWORD
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/build.gradle")
+          s = p.read_text()
+          if "signingConfigs {" not in s:
+              s = s.replace(
+                  "android {",
+                  """android {
+              signingConfigs {
+                  release {
+                      storeFile file(STACKFOUR_STORE_FILE)
+                      storePassword STACKFOUR_STORE_PASSWORD
+                      keyAlias STACKFOUR_KEY_ALIAS
+                      keyPassword STACKFOUR_KEY_PASSWORD
+                  }
+              }
+          """,
+                  1
+              )
+          if "signingConfig signingConfigs.release" not in s:
+              s = s.replace(
+                  "buildTypes {\n        release {",
+                  "buildTypes {\n        release {\n            signingConfig signingConfigs.release",
+                  1
+              )
+          p.write_text(s)
+          PY
+
+      - name: Build signed release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Upload signed release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: StackFour-Release-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
         run: npx cap add android
 
       - name: Sync game
